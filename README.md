@@ -2,7 +2,7 @@
 
 ### High-Performance Orchestration for Multi-Instance OpenClaw Swarms.
 
-![The Legendary King Lobster Mascot](https://github.com/upsurge911-lgtm/SurgeClaw/raw/main/assets/king_lobster_surge_mascot.png)
+![The Legendary King Lobster Mascot](assets/king_lobster_surge_mascot.png)
 
 > [!NOTE]
 > **SurgeClaw is a thin orchestration layer designed to magnify the native capabilities of OpenClaw.** It enables you to run multiple independent agents on a single machine with zero port collisions and absolute process isolation.
