@@ -1,5 +1,5 @@
 {
-  "name": "@surgeclaw/cli",
+  "name": "@amitsingh911/surgeclaw",
   "version": "1.0.0",
   "description": "High-Performance Orchestration for Multi-Instance OpenClaw Swarms 🦞⚡",
   "main": "src/index.js",
