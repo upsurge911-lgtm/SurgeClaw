@@ -13,7 +13,7 @@ const program = new Command();
 program
     .name('surgeclaw')
     .description('The King Lobster Orchestrator for OpenClaw Swarms 🦞⚡')
-    .version('1.0.2');
+    .version('1.0.3');
 
 // Initial setup
 const printBanner = () => {
@@ -23,7 +23,7 @@ const printBanner = () => {
     ███████╗██║   ██║██████╔╝██║  ███╗█████╗  ██║     ██║     ███████║██║ █╗ ██║
     ╚════██║██║   ██║██╔══██╗██║   ██║██╔══╝  ██║     ██║     ██╔══██║██║███╗██║
     ███████║╚██████╔╝██║  ██║╚██████╔╝███████╗╚██████╗███████╗██║  ██║╚███╔███╔╝
-    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.0.2
+    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.0.3
     `;
     console.log(chalk.cyan(banner));
 };
@@ -104,28 +104,32 @@ program
         }
 
         const { instances } = await state.load();
+        const { isPortAvailable } = require('./core/port-hunter');
+        const port18789Busy = !(await isPortAvailable(18789));
+        
         let startPort = 18789;
 
-        // Trust but Verify: Check for existing OpenClaw
-        if (instances.length === 0) {
+        // EMERGENCY PATCH (v1.0.3): Protect Port 18789 from collisions
+        // If an agent exists OR if 18789 is busy, we MUST jump to the swarm block (18809+)
+        if (instances.length > 0 || port18789Busy) {
+            startPort = 18809;
+            if (port18789Busy && instances.length === 0) {
+                console.log(chalk.yellow('\n  Safety Alert: Detected active service on Port 18789 (Main Office).'));
+                console.log(chalk.dim('  I will reserve this port and onboard your new agent starting at Port 18809.'));
+            }
+        } else {
+            // Only ask if it is the first agent AND 18789 is actually free
             const { hasMain } = await inquirer.prompt([
                 {
                     type: 'confirm',
                     name: 'hasMain',
-                    message: 'Are you already running a primary OpenClaw instance on this machine?',
+                    message: 'Do you plan to run a primary OpenClaw instance alongside this swarm?',
                     default: true
                 }
             ]);
 
-            const { isPortAvailable } = require('./core/port-hunter');
-            const port18789Busy = !(await isPortAvailable(18789));
-
             if (hasMain) {
                 console.log(chalk.cyan('\n  Confirmed. Reserving Port 18789 for your Main office.'));
-                startPort = 18809;
-            } else if (port18789Busy) {
-                console.log(chalk.yellow('\n  Safety Alert: Your answer was "No", but I detected an active service on Port 18789.'));
-                console.log(chalk.dim('  I will reserve this port for your safety and shift your new agent to Port 18809.'));
                 startPort = 18809;
             }
         }
