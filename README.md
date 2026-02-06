@@ -39,7 +39,7 @@ SurgeClaw uses a "Three-Layer Isolation" strategy to ensure your agents never bl
 
 ## 📦 Installation
 ```bash
-npm install -g @surgeclaw/cli
+npm install -g advantage-surgeclaw
 ```
 *(Requires OpenClaw to be installed via your preferred method: npm, pnpm, or nix)*
 
@@ -68,7 +68,7 @@ surgeclaw Marketing setup
 surgeclaw Security setup
 ```
 
-### 2. Launch the Swarm
+### 3. Launch the Swarm
 Deploy your entire organization to the background in one command:
 ```bash
 # Wake up the entire swarm (CEO, Marketing, Lead-Gen)
@@ -79,7 +79,7 @@ surgeclaw start KingLobster
 surgeclaw stop KingLobster
 ```
 
-### 3. Step Into the Office
+### 4. Step Into the Office
 Step inside an agent's environment and use native `openclaw` commands directly:
 ```bash
 surgeclaw configure Marketing
