@@ -103,8 +103,35 @@ program
             role = role || answers.role;
         }
 
+        const { instances } = await state.load();
+        let startPort = 18789;
+
+        // Trust but Verify: Check for existing OpenClaw
+        if (instances.length === 0) {
+            const { hasMain } = await inquirer.prompt([
+                {
+                    type: 'confirm',
+                    name: 'hasMain',
+                    message: 'Are you already running a primary OpenClaw instance on this machine?',
+                    default: true
+                }
+            ]);
+
+            const { isPortAvailable } = require('./core/port-hunter');
+            const port18789Busy = !(await isPortAvailable(18789));
+
+            if (hasMain) {
+                console.log(chalk.cyan('\n  Confirmed. Reserving Port 18789 for your Main office.'));
+                startPort = 18809;
+            } else if (port18789Busy) {
+                console.log(chalk.yellow('\n  Safety Alert: Your answer was "No", but I detected an active service on Port 18789.'));
+                console.log(chalk.dim('  I will reserve this port for your safety and shift your new agent to Port 18809.'));
+                startPort = 18809;
+            }
+        }
+
         const profile = `surge-${name}`;
-        const port = await findNextPortBlock();
+        const port = await findNextPortBlock(startPort);
 
         const instance = {
             name,
@@ -124,7 +151,7 @@ program
         await state.addInstance(instance);
 
         console.log(chalk.green(`\n✔ Agent "${name}" initialized in your swarm!`));
-        console.log(chalk.cyan(`\nTo setup his soul, run: `) + chalk.bold.white(`surgeclaw \${name} setup`));
+        console.log(chalk.cyan(`\nTo setup his soul, run: `) + chalk.bold.white(`surgeclaw ${name} setup`));
         console.log(chalk.dim(`(This will trigger the native OpenClaw setup wizard inside this isolated cabinet)`));
     });
 
@@ -142,9 +169,9 @@ swarm
             return;
         }
 
-        console.log(chalk.bold.cyan(`\n🦞 Waking up the swarm (\${instances.length} agents)...`));
+        console.log(chalk.bold.cyan(`\n🦞 Waking up the swarm (${instances.length} agents)...`));
         for (const instance of instances) {
-            process.stdout.write(`  Deploying \${chalk.bold(instance.name)}... `);
+            process.stdout.write(`  Deploying ${chalk.bold(instance.name)}... `);
             try {
                 await orchestrator.startGateway(instance, instance.port);
                 console.log(chalk.green('✔'));
@@ -173,13 +200,13 @@ program
         const instance = await state.getInstance(name);
 
         if (!instance) {
-            console.log(chalk.red(`\n✖ Agent "\${name}" not found.`));
+            console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
             return;
         }
 
-        console.log(chalk.bold.cyan(`\n🦞 Deploying \${name} to the background...`));
+        console.log(chalk.bold.cyan(`\n🦞 Deploying ${name} to the background...`));
         await orchestrator.startGateway(instance, instance.port);
-        console.log(chalk.green(`✔ \${name} is now running on Port \${instance.port}!`));
+        console.log(chalk.green(`✔ ${name} is now running on Port ${instance.port}!`));
         console.log(chalk.dim('You can close this terminal window; the agent will stay alive.'));
     });
 
@@ -191,14 +218,14 @@ program
         const instance = await state.getInstance(name);
 
         if (!instance) {
-            console.log(chalk.red(`\n✖ Agent "\${name}" not found.`));
+            console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
             return;
         }
 
-        console.log(chalk.bold.yellow(`\n🦞 Signaling \${name} to stand down...`));
+        console.log(chalk.bold.yellow(`\n🦞 Signaling ${name} to stand down...`));
         const shell = require('shelljs');
-        shell.exec(`pkill -f "profile \${instance.profile}"`, { silent: true });
-        console.log(chalk.green(`✔ \${name} has been stopped.`));
+        shell.exec(`pkill -f "profile ${instance.profile}"`, { silent: true });
+        console.log(chalk.green(`✔ ${name} has been stopped.`));
     });
 
 program
@@ -209,12 +236,12 @@ program
         const instance = await state.getInstance(name);
 
         if (!instance) {
-            console.log(chalk.red(`\n✖ Agent "\${name}" not found.`));
+            console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
             return;
         }
 
-        console.log(boxen(chalk.bold.cyan(`🦞 You have stepped into Office: \${name}`), { padding: 1, borderStyle: 'double' }));
-        console.log(chalk.yellow(`Environment locked to Profile: \${instance.profile} | Port: \${instance.port}`));
+        console.log(boxen(chalk.bold.cyan(`🦞 You have stepped into Office: ${name}`), { padding: 1, borderStyle: 'double' }));
+        console.log(chalk.yellow(`Environment locked to Profile: ${instance.profile} | Port: ${instance.port}`));
         console.log(chalk.dim('Type "exit" to leave this agent\'s cabinet.\n'));
 
         const env = {
@@ -235,7 +262,7 @@ program
         });
 
         child.on('close', (code) => {
-            console.log(chalk.bold.cyan(`\n🦞 Stepped out of Office: \${name}. Back in the Kingdom.`));
+            console.log(chalk.bold.cyan(`\n🦞 Stepped out of Office: ${name}. Back in the Kingdom.`));
         });
     });
 
@@ -253,7 +280,7 @@ program
         if (!name || (await state.getInstance(name)) === undefined) {
             const { instances } = await state.load();
             if (instances.length === 0) {
-                if (name) console.log(chalk.red(`\n✖ Agent "\${name}" not found.`));
+                if (name) console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
                 else console.log(chalk.yellow('\nNo agents found. Run "surgeclaw onboard" first.'));
                 return;
             }
@@ -264,8 +291,8 @@ program
                 {
                     type: 'list',
                     name: 'selected',
-                    message: `Which agent should run: \${chalk.cyan(actualCommands.join(' ')) || 'this command'}?`,
-                    choices: instances.map(i => ({ name: `\${i.name} (Port: \${i.port})`, value: i.name }))
+                    message: `Which agent should run: ${chalk.cyan(actualCommands.join(' ')) || 'this command'}?`,
+                    choices: instances.map(i => ({ name: `${i.name} (Port: ${i.port})`, value: i.name }))
                 }
             ]);
             targetInstance = instances.find(i => i.name === answers.selected);
@@ -275,7 +302,7 @@ program
         targetInstance = await state.getInstance(name);
 
         if (!commands || commands.length === 0) {
-            console.log(chalk.yellow(`\nAgent "\${name}" is active. Example: surgeclaw \${name} gateway`));
+            console.log(chalk.yellow(`\nAgent "${name}" is active. Example: surgeclaw ${name} gateway`));
             return;
         }
 
