@@ -1,5 +1,5 @@
 {
-  "name": "@amitsingh911/surgeclaw",
+  "name": "advantage-surgeclaw",
   "version": "1.0.0",
   "description": "High-Performance Orchestration for Multi-Instance OpenClaw Swarms 🦞⚡",
   "main": "src/index.js",
@@ -20,7 +20,7 @@
     "ai-agents",
     "automation"
   ],
-  "author": "Amit | Upsurge.ae",
+  "author": "Advantage Technologies Inc.",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
