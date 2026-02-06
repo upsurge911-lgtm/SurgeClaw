@@ -13,7 +13,7 @@ const program = new Command();
 program
     .name('surgeclaw')
     .description('The King Lobster Orchestrator for OpenClaw Swarms 🦞⚡')
-    .version('1.0.0');
+    .version('1.0.2');
 
 // Initial setup
 const printBanner = () => {
@@ -23,7 +23,7 @@ const printBanner = () => {
     ███████╗██║   ██║██████╔╝██║  ███╗█████╗  ██║     ██║     ███████║██║ █╗ ██║
     ╚════██║██║   ██║██╔══██╗██║   ██║██╔══╝  ██║     ██║     ██╔══██║██║███╗██║
     ███████║╚██████╔╝██║  ██║╚██████╔╝███████╗╚██████╗███████╗██║  ██║╚███╔███╔╝
-    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.0.0
+    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.0.2
     `;
     console.log(chalk.cyan(banner));
 };
@@ -87,7 +87,7 @@ program
                 {
                     type: 'input',
                     name: 'name',
-                    message: 'Name your new high-power agent:',
+                    message: 'Name your new agent:',
                     when: !name,
                     validate: input => input.length > 0 ? true : 'Name is required'
                 },
@@ -151,8 +151,107 @@ program
         await state.addInstance(instance);
 
         console.log(chalk.green(`\n✔ Agent "${name}" initialized in your swarm!`));
-        console.log(chalk.cyan(`\nTo setup his soul, run: `) + chalk.bold.white(`surgeclaw ${name} setup`));
-        console.log(chalk.dim(`(This will trigger the native OpenClaw setup wizard inside this isolated cabinet)`));
+        console.log(chalk.cyan(`\nNext Step: Step into the office to configure this agent:`));
+        console.log(chalk.bold.white(`  surgeclaw configure "${name}"`));
+        console.log(chalk.dim(`\n(Inside the office, run "openclaw setup" to configure the agent's soul)`));
+    });
+
+program
+    .command('offboard <name...>')
+    .description('Decommission an agent and remove them from the swarm')
+    .action(async (nameParts) => {
+        await init();
+        const name = nameParts.join(' ');
+        const instance = await state.getInstance(name);
+
+        if (!instance) {
+            console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
+            return;
+        }
+
+        const { confirm } = await inquirer.prompt([
+            {
+                type: 'confirm',
+                name: 'confirm',
+                message: `Are you sure you want to remove agent "${name}" from the swarm?`,
+                default: false
+            }
+        ]);
+
+        if (!confirm) return;
+
+        console.log(chalk.yellow(`\n🦞 Retiring ${name}...`));
+
+        // Stop process
+        const shell = require('shelljs');
+        shell.exec(`pkill -f "profile ${instance.profile}"`, { silent: true });
+
+        // Remove from state
+        await state.removeInstance(name);
+
+        const { wipe } = await inquirer.prompt([
+            {
+                type: 'confirm',
+                name: 'wipe',
+                message: `Do you want to wipe all physical data folders for "${name}"? (Irreversible)`,
+                default: false
+            }
+        ]);
+
+        if (wipe) {
+            const agentRoot = state.getInstancePath(name);
+            await require('fs-extra').remove(agentRoot);
+            console.log(chalk.green(`✔ Data folders for ${name} purged.`));
+        }
+
+        console.log(chalk.green(`\n✔ Agent "${name}" offboarded successfully.`));
+    });
+
+program
+    .command('uninstall')
+    .description('Completely remove SurgeClaw and its configurations')
+    .action(async () => {
+        await init();
+        printBanner();
+
+        console.log(chalk.bold.red('\n⚠ WARNING: This will dismantle the King Lobster\'s kingdom.'));
+
+        const { mode } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'mode',
+                message: 'Choose your uninstallation depth:',
+                choices: [
+                    { name: 'Ghost Mode (Safe): Delete manager config, keep agent data.', value: 'ghost' },
+                    { name: 'Nuclear Mode (Total): Wipe every trace of SurgeClaw.', value: 'nuclear' },
+                    { name: 'Cancel', value: 'cancel' }
+                ]
+            }
+        ]);
+
+        if (mode === 'cancel') return;
+
+        console.log(chalk.yellow('\n🦞 Dismantling SurgeClaw...'));
+
+        // Stop all agents
+        const shell = require('shelljs');
+        shell.exec('pkill -f openclaw', { silent: true });
+
+        if (mode === 'nuclear') {
+            const { instances } = await state.load();
+            for (const inst of instances) {
+                const agentRoot = state.getInstancePath(inst.name);
+                await require('fs-extra').remove(agentRoot);
+            }
+            console.log(chalk.green('✔ All agent data cabinets purged.'));
+        }
+
+        // Wipe global config
+        await require('fs-extra').remove(state.root);
+        console.log(chalk.green(`✔ SurgeClaw global configuration (${state.root}) removed.`));
+
+        console.log(chalk.bold.green('\nUninstallation complete. SurgeClaw has left the building. 🦞👋'));
+        console.log(chalk.dim('Note: To remove the npm package, run "npm uninstall -g advantage-surgeclaw" manually.\n'));
     });
 
 const swarm = program.command('swarm').description('Manage the entire agent swarm');
@@ -193,10 +292,11 @@ swarm
     });
 
 program
-    .command('start <name>')
+    .command('start <name...>')
     .description('Launch an agent as a persistent background process')
-    .action(async (name) => {
+    .action(async (nameParts) => {
         await init();
+        const name = nameParts.join(' ');
         const instance = await state.getInstance(name);
 
         if (!instance) {
@@ -211,10 +311,11 @@ program
     });
 
 program
-    .command('stop <name>')
+    .command('stop <name...>')
     .description('Stop a specific background agent')
-    .action(async (name) => {
+    .action(async (nameParts) => {
         await init();
+        const name = nameParts.join(' ');
         const instance = await state.getInstance(name);
 
         if (!instance) {
@@ -229,10 +330,11 @@ program
     });
 
 program
-    .command('configure <name>')
+    .command('configure <name...>')
     .description('Step inside an agent\'s cabinet and enter Configure Mode (Immersive Sub-shell)')
-    .action(async (name) => {
+    .action(async (nameParts) => {
         await init();
+        const name = nameParts.join(' ');
         const instance = await state.getInstance(name);
 
         if (!instance) {
@@ -268,46 +370,60 @@ program
 
 // Catch-all for instance-specific commands
 program
-    .arguments('[name] [commands...]')
+    .arguments('[args...]')
     .description('Run a command for a specific agent')
-    .action(async (name, commands) => {
+    .action(async (args) => {
         await init();
 
-        if (['onboard', 'list', 'status', 'configure', 'start', 'stop', 'swarm'].includes(name)) return;
+        if (args.length === 0) {
+            program.help();
+            return;
+        }
 
+        const knownCommands = ['onboard', 'list', 'status', 'configure', 'start', 'stop', 'swarm', 'offboard', 'uninstall'];
+        if (knownCommands.includes(args[0])) return;
+
+        const { instances } = await state.load();
+
+        if (instances.length === 0) {
+            console.log(chalk.yellow('\nNo agents found. Run "surgeclaw onboard" first.'));
+            return;
+        }
+
+        // Try to match agent name by checking argument prefixes
         let targetInstance;
+        let commandArgs = [];
 
-        if (!name || (await state.getInstance(name)) === undefined) {
-            const { instances } = await state.load();
-            if (instances.length === 0) {
-                if (name) console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
-                else console.log(chalk.yellow('\nNo agents found. Run "surgeclaw onboard" first.'));
-                return;
+        for (let i = 1; i <= args.length; i++) {
+            const potentialName = args.slice(0, i).join(' ');
+            const found = instances.find(inst => inst.name === potentialName);
+            if (found) {
+                targetInstance = found;
+                commandArgs = args.slice(i);
+                break;
             }
+        }
 
-            const actualCommands = name ? [name, ...commands] : commands;
-
+        if (!targetInstance) {
             const answers = await inquirer.prompt([
                 {
                     type: 'list',
                     name: 'selected',
-                    message: `Which agent should run: ${chalk.cyan(actualCommands.join(' ')) || 'this command'}?`,
+                    message: "Select an agent:",
                     choices: instances.map(i => ({ name: `${i.name} (Port: ${i.port})`, value: i.name }))
                 }
             ]);
             targetInstance = instances.find(i => i.name === answers.selected);
-            return await orchestrator.runCommand(targetInstance, actualCommands);
+            commandArgs = args;
         }
 
-        targetInstance = await state.getInstance(name);
-
-        if (!commands || commands.length === 0) {
-            console.log(chalk.yellow(`\nAgent "${name}" is active. Example: surgeclaw ${name} gateway`));
+        if (commandArgs.length === 0) {
+            console.log(chalk.yellow(`\nAgent "${targetInstance.name}" is active. Example: surgeclaw ${targetInstance.name} gateway`));
             return;
         }
 
         try {
-            await orchestrator.runCommand(targetInstance, commands);
+            await orchestrator.runCommand(targetInstance, commandArgs);
         } catch (err) {
             // Error handled by child process inheritance
         }

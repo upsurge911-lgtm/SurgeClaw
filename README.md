@@ -66,25 +66,47 @@ Call native OpenClaw setup commands directly through the SurgeClaw router:
 ```bash
 surgeclaw Marketing setup
 surgeclaw Security setup
+
+### 2. Onboard your first Agent
+```bash
+surgeclaw onboard
 ```
 
-### 3. Launch the Swarm
-Deploy your entire organization to the background in one command:
+### 3. Step Into the Office
+The most powerful way to interact with an agent is to step into its cabinet. This locks your terminal to that specific agent's environment.
+
 ```bash
-# Wake up the entire swarm (CEO, Marketing, Lead-Gen)
+surgeclaw configure "Marketing Specialist"
+```
+**Inside the office, you can run native commands:**
+- `openclaw setup` ➡️ Configure the agent's soul.
+- `openclaw gateway` ➡️ Launch the agent for testing.
+- `exit` ➡️ Leave the office.
+
+### 4. Launch the Swarm
+Once your agents are configured, you can launch them all at once as background processes.
+
+```bash
 surgeclaw swarm start
-
-# Or control a specific agent
-surgeclaw start KingLobster
-surgeclaw stop KingLobster
 ```
 
-### 4. Step Into the Office
-Step inside an agent's environment and use native `openclaw` commands directly:
+## Management & Safety
+
+### Individual Agent Control
+*   `surgeclaw start "Lead Gen"`: Launch a specific agent in the background.
+*   `surgeclaw stop "Lead Gen"`: Stop a specific background agent.
+*   `surgeclaw offboard "Lead Gen"`: Remove an agent from the swarm (with optional data wiping).
+
+### The Master Kill Switch
+*   `surgeclaw swarm stop`: Shutdown all background agents immediately.
+
+### Global Uninstall
+If you need to remove SurgeClaw, we offer a clean exit:
 ```bash
-surgeclaw configure Marketing
+surgeclaw uninstall
 ```
-
+- **Ghost Mode**: Removes SurgeClaw but keeps your agent data folders.
+- **Nuclear Mode**: Wipes every trace of SurgeClaw for a fresh system slate.
 ---
 
 ## 🛡️ Reliability & Security

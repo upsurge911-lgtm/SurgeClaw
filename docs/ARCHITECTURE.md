@@ -1,31 +1,54 @@
-# SurgeClaw Architecture 🏛️
+# SurgeClaw Architecture 🦞🏗️
 
-SurgeClaw is a thin, high-performance orchestrator for multi-instance OpenClaw swarms. It follows a **"Church and State"** separation model, ensuring that while agents share a machine, they share nothing else.
+SurgeClaw is designed as a **Thin Orchestration Layer** that magnifies OpenClaw without interfering with its core logic. It uses a "Shadow Environment" pattern to achieve multi-tenancy on a single machine.
 
-## 1. The Isolation Core
-SurgeClaw achieves 100% process isolation through three primary primitives:
+## High-Level Workflow
 
-### A. Digital Cloaking (Environment Scoping)
-Every agent spawned by SurgeClaw has its environment variables surgically overridden:
-- `HOME`: Points to the agent's unique directory (e.g., `~/.openclaw/agents/Marketing`).
-- `OPENCLAW_HOME`: Aligns with the new fake `HOME`.
-- `OPENCLAW_CONFIG_PATH`: Directly targets the agent's specific `openclaw.json`.
-- `OPENCLAW_STATE_DIR`: Points to the agent's unique state folder.
+```mermaid
+graph TD
+    User([User]) -->|CLI Command| SC[SurgeClaw CLI]
+    SC -->|Environment Mapping| SA[Isolated Agent Cabinet]
+    
+    subgraph "The Digital Vault"
+        SA -->|Unique HOME| OC[OpenClaw Instance]
+        SA -->|Unique Port| OPR[OpenClaw Process]
+        SA -->|Isolated State| OSD[State Directory]
+    end
+    
+    SC -->|State Management| State[(state.json)]
+    SC -->|Port Protection| PH[Port Hunter]
+```
 
-This "Cloak" forces OpenClaw's internal logic to believe its isolated cabinet is the entire file system.
+## Key Mechanisms
 
-### B. Path Confinement
-SurgeClaw executes all child processes with a unique `cwd` (Current Working Directory) within the agent's cabinet. This prevents relative path leakage and ensures log files and temporary artifacts stay localized.
+### 1. Environment Cloaking
+SurgeClaw manipulates standard Node.js environment variables to trick OpenClaw into thinking it is running in its own dedicated home directory.
+*   `HOME`: Pointed to the agent's unique cabinet.
+*   `OPENCLAW_HOME`: Overridden for direct configuration management.
+*   `OPENCLAW_STATE_DIR`: Decoupled from the primary OpenClaw instance.
 
-### C. Port Spacing (The 20-Port Rule)
-OpenClaw derives several internal ports (CDP, Relay, Canvas) from the base Gateway port. SurgeClaw enforces a mandatory **20-port block** between agents:
-- **Agent A (CEO):** Port 18789 (+1 to +19 reserved).
-- **Agent B (Marketing):** Port 18809 (+1 to +19 reserved).
+### 2. Smart Port Protection
+SurgeClaw identifies the primary OpenClaw port (18789) and reserves it. It then dynamically assigns blocks of 10 ports per agent to prevent background service collisions.
 
-## 2. Process Lifecycle
-SurgeClaw manages agents in two primary modes:
-1. **Interactive Mode (`surgeclaw [name] [cmd]`):** Spawns a synchronous child process. Control returns only after the command completes.
-2. **Persistence Mode (`surgeclaw start` / `swarm start`):** Spawns a **Detached Process**. The parent SurgeClaw process exits immediately, leaving the agent running independently in the background.
+### 3. Sub-shell Interactivity (`configure`)
+The `configure` command spawns a child process with an injected environment. This allows users to use native `openclaw` commands directly without SurgeClaw needing to "wrap" every possible function.
 
-## 3. GUI Synergy
-SurgeClaw uses the standard `~/.openclaw/agents` directory structure. This ensures that any agent created via the CLI is instantly visible and manageable via the official **OpenClaw Control UI** (Companion App), allowing for visual permission management and heartbeat monitoring.
+```mermaid
+sequenceDiagram
+    participant User
+    participant SC as SurgeClaw
+    participant Shell as Sub-Shell
+    participant OC as OpenClaw
+    
+    User->>SC: surgeclaw configure Marketing
+    SC-->>Shell: Spawn with Isolated ENV
+    User->>Shell: openclaw setup
+    Shell->>OC: Executing in Vault
+    OC-->>User: (Native Wizard UI)
+    User->>Shell: exit
+    Shell-->>SC: Closed
+    SC->>User: Back in Kingdom
+```
+
+## Data Isolation Policy
+SurgeClaw follows a STRICT isolation policy. It cannot read or modify the primary `~/.openclaw` configuration unless explicitly authorized during the `onboard` wizard for port detection.

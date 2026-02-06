@@ -47,6 +47,12 @@ class StateManager {
         await this.save(state);
     }
 
+    async removeInstance(name) {
+        const state = await this.load();
+        state.instances = state.instances.filter(i => i.name !== name);
+        await this.save(state);
+    }
+
     async getInstance(name) {
         const state = await this.load();
         return state.instances.find(i => i.name === name);
