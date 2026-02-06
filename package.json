@@ -1,16 +1,26 @@
 {
-  "name": "surgeclaw",
+  "name": "@surgeclaw/cli",
   "version": "1.0.0",
-  "description": "The King Lobster Orchestrator for OpenClaw Swarms 🦞⚡",
+  "description": "High-Performance Orchestration for Multi-Instance OpenClaw Swarms 🦞⚡",
   "main": "src/index.js",
   "bin": {
     "surgeclaw": "./src/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/upsurge911-lgtm/SurgeClaw.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "openclaw",
+    "swarm",
+    "orchestration",
+    "ai-agents",
+    "automation"
+  ],
+  "author": "Amit | Upsurge.ae",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
