@@ -4,7 +4,7 @@
 SurgeClaw is a professional process manager and governance layer for OpenClaw swarms.  
 It enables you to deploy, isolate, and audit multiple AI agents on a single machine with zero configuration debt.
 
-![SurgeClaw Sentinel Demo](assets/Demo.gif)
+<video src="assets/Demo.mp4" autoplay loop muted playsinline width="100%"></video>
 
 ---
 
