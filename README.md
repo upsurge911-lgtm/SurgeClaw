@@ -1,118 +1,82 @@
 # SurgeClaw 🦞⚡
 
-### High-Performance Orchestration for Multi-Instance OpenClaw Swarms.
+**One Machine. Infinite OpenClaws.**  
+SurgeClaw is a professional process manager and governance layer for OpenClaw swarms.  
+It enables you to deploy, isolate, and audit multiple AI agents on a single machine with zero configuration debt.
 
-![The Legendary King Lobster Mascot](assets/king_lobster_surge_mascot.png)
-
-> [!NOTE]
-> **SurgeClaw is a thin orchestration layer designed to magnify the native capabilities of OpenClaw.** It enables you to run multiple independent agents on a single machine with zero port collisions and absolute process isolation.
+![SurgeClaw Sentinel Demo](assets/Demo.gif)
 
 ---
 
-## 🏛️ The Philosophy
-In the agentic era, scaling your business shouldn't mean scaling your risk. SurgeClaw allows you to departmentalize your AI workflows by running specialized, isolated OpenClaw instances for every role—from Marketing to Pen-Testing.
+## ⚡ Quick Start
 
-- **Non-Intrusive:** We don't fork OpenClaw. We don't change its internal logic. We simply automate the native isolation features.
-- **Zero Lock-in:** All configurations are standard JSON. If SurgeClaw is removed, your agents continue to function natively.
-- **Resource Aware:** Designed for high-density environments like the Mac Mini, ensuring safe port management and directory isolation.
-
-## 🛡️ Why SurgeClaw?
-
-### 1. Departmental Integrity
-Running one agent is experimental. Running an organization requires isolation. Your "Master" agent (holding payment details and core secrets) should never be used to test unstable alpha-features. SurgeClaw lets you spin up a dedicated "Testing" or "HR" agent in 10 seconds.
-
-### 2. Failure Isolation
-If a specialized agent crashes during heavy experimentation, your primary business workflows remain untouched. "Fail-fast" is finally safe.
-
-### 3. Cost & Context Optimization
-Direct specific agents to use job-optimized local models or quantized LLMs, while reserving high-end APIs for your "Master" instance. SurgeClaw makes managing these environment-specific overrides instantaneous.
-
-### 4. GUI Native Support
-SurgeClaw aligns its directory structure with the OpenClaw Control UI. Every agent you onboard via CLI will automatically appear in your native Control UI dropdown, allowing you to manage granular permissions (Screen Recording, Accessibility) for each individual specialist.
-
-## ⚙️ Under the Hood: Technical Primitives
-SurgeClaw uses a "Three-Layer Isolation" strategy to ensure your agents never bleed into each other or your host system:
-- **Digital Cloaking:** We override the `HOME` and `OPENCLAW_HOME` environment variables for every child process, forcing the agent to treat its own cabinet as the root of the universe.
-- **Path Confinement:** Every command is executed from a unique `cwd` (Current Working Directory) within the agent's instance folder.
-- **Port Spacing:** SurgeClaw enforces a mandatory 20-port block spacing (starting at 18789) to prevent WebSocket gateway collisions.
-- **Swarm Management:** Instead of using the native `--install-daemon` (which can conflict in multi-agent setups), SurgeClaw acts as the process orchestrator for your swarm, ensuring each agent stays in its lane.
-
-## 📦 Installation
+### 1. Install
 ```bash
 npm install -g advantage-surgeclaw
 ```
-*(Requires OpenClaw to be installed via your preferred method: npm, pnpm, or nix)*
 
-## 🛠️ Getting Started
-
-> [!WARNING]
-> **Avoid Native Daemon for Swarms:** Do not run `openclaw onboard --install-daemon` inside your SurgeClaw agents. This replaces the OS-level service for your *entire* machine and will cause collisions between agents. SurgeClaw acts as your centralized swarm manager.
-
-### 1. Initialize Your Departments
-Initialize your CEO/Daily Driver first, then spin up OpenClaw agents:
+### 2. Launch
 ```bash
-# Set up your KingLobster (CEO / Daily Driver)
-surgeclaw onboard --name KingLobster --role "CEO"
-
-# Register the Marketing lead
-surgeclaw onboard --name Marketing --role "Content Specialist"
-
-# Register high-bandwidth Lead Gen
-surgeclaw onboard --name Lead-Gen --role "Outreach Factory"
-```
-
-### 2. Configure the "Soul"
-Call native OpenClaw setup commands directly through the SurgeClaw router:
-```bash
-surgeclaw Marketing setup
-surgeclaw Security setup
-
-### 2. Onboard your first Agent
-```bash
+# Onboard your first agent
 surgeclaw onboard
-```
 
-### 3. Step Into the Office
-The most powerful way to interact with an agent is to step into its cabinet. This locks your terminal to that specific agent's environment.
-
-```bash
-surgeclaw configure "Marketing Specialist"
-```
-**Inside the office, you can run native commands:**
-- `openclaw setup` ➡️ Configure the agent's soul.
-- `openclaw gateway` ➡️ Launch the agent for testing.
-- `exit` ➡️ Leave the office.
-
-### 4. Launch the Swarm
-Once your agents are configured, you can launch them all at once as background processes.
-
-```bash
+# Activate the swarm
 surgeclaw swarm start
 ```
 
-## Management & Safety
-
-### Individual Agent Control
-*   `surgeclaw start "Lead Gen"`: Launch a specific agent in the background.
-*   `surgeclaw stop "Lead Gen"`: Stop a specific background agent.
-*   `surgeclaw offboard "Lead Gen"`: Remove an agent from the swarm (with optional data wiping).
-
-### The Master Kill Switch
-*   `surgeclaw swarm stop`: Shutdown all background agents immediately.
-
-### Global Uninstall
-If you need to remove SurgeClaw, we offer a clean exit:
-```bash
-surgeclaw uninstall
-```
-- **Ghost Mode**: Removes SurgeClaw but keeps your agent data folders.
-- **Nuclear Mode**: Wipes every trace of SurgeClaw for a fresh system slate.
 ---
 
-## 🛡️ Reliability & Security
-SurgeClaw implements a **Hard Environment Barrier**. It will never access or modify your default `~/.openclaw` directory unless you explicitly authorize a migration. Your core agents remain in a "Private Vault" while the swarm handles the heavy lifting.
+## 🛡️ SurgeClaw Sentinel (v1.1.0)
+SurgeClaw Sentinel transforms a group of agents into a **Regulated AI Department**. It layers enterprise-grade security over native OpenClaw logic:
 
-**Scale your organization. Protect your King.** 🦞⚡🦾
+*   **Audit Ledger**: Every management action is recorded to a secure, tamper-proof log for SOC 2 and UAE AI Act compliance.
+*   **Strict Mode**: Enforces UNIX 600 (User-Only) permissions at the OS level for agent configuration and memory.
+*   **Personal/Enterprise Toggle**: Switch between a low-friction developer mode and a high-governance environment with one choice.
 
 ---
-*SurgeClaw is a community-driven expansion for the OpenClaw ecosystem. We are not officially affiliated with the OpenClaw core team; we just build tools that make their work go further.*
+
+## 🏗️ From Monolith to Enterprise Swarm
+Running an entire organization on a single OpenClaw instance is a critical vulnerability. In a monolithic setup, shared memory and single-port reliance mean that a fatal error during an experimental script test will bring down your core financial and operational agents. There is no permission boundary, and no audit trail for compliance.
+
+**SurgeClaw** restructures OpenClaw for the Enterprise:
+*   **Absolute Failure Isolation**: Every agent lives in a UNIX-locked vault (`chmod 700`). If your "Testing" agent crashes its sandbox, your "CEO" and "Finance" agents remain completely unaffected and online.
+*   **Sovereign Compliance**: Out of the box, SurgeClaw Sentinel provides a tamper-proof Audit Ledger, aligning your deployment with **SOC 2, HIPAA, and UAE PDPL** mandates.
+*   **Infinite Scalability**: Augment your entire corporate structure. Instantiate a new department entirely isolated from the rest of the company in 10 seconds, leveraging a single piece of hardware with zero network collisions.
+
+![Diagram](assets/README_diagram_1.svg)
+
+---
+
+## 🏛️ Architecture: The "Landlord" Model
+SurgeClaw acts as the **Administrative Command Center**. We do not rewrite OpenClaw's "soul"; we orchestrate its environment.
+
+![Diagram](assets/README_diagram_2.svg)
+
+---
+
+## 💼 Use Cases
+
+*   **The Solo Founder**: Run a full C-suite (CEO, CMO, CTO) on a single Mac Mini with absolute data isolation.
+*   **The AI Agency**: Deploy isolated, client-specific environments with zero port collisions or credential leaks.
+*   **The Enterprise Tower**: Meet regional compliance (UAE PDPL, GDPR) by hosting all AI processing on sovereign local hardware.
+
+---
+
+## 🛠️ Management Commands
+
+| Command | Action |
+| :--- | :--- |
+| `surgeclaw onboard` | Interactive wizard with Sentinel security choices. |
+| `surgeclaw swarm start` | Instant, background deployment of all registered agents. |
+| `surgeclaw configure [name]` | Step into an agent's isolated sub-shell (The Office). |
+| `surgeclaw status` | Real-time heartbeat and health check for the entire swarm. |
+
+*Full documentation available in* [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md).
+
+---
+
+## 📜 Identity & Philosophy
+*   **Thin Wrapper**: We inherit every OpenClaw update natively. No maintenance debt.
+*   **Identity**: Built for the sovereign developer. Made with 🦞 in Dubai.
+
+**Advantage Technologies Inc. | 2026**

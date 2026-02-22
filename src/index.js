@@ -13,7 +13,7 @@ const program = new Command();
 program
     .name('surgeclaw')
     .description('The King Lobster Orchestrator for OpenClaw Swarms 🦞⚡')
-    .version('1.0.4');
+    .version('1.1.0');
 
 // Initial setup
 const printBanner = () => {
@@ -23,7 +23,7 @@ const printBanner = () => {
     ███████╗██║   ██║██████╔╝██║  ███╗█████╗  ██║     ██║     ███████║██║ █╗ ██║
     ╚════██║██║   ██║██╔══██╗██║   ██║██╔══╝  ██║     ██║     ██╔══██║██║███╗██║
     ███████║╚██████╔╝██║  ██║╚██████╔╝███████╗╚██████╗███████╗██║  ██║╚███╔███╔╝
-    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.0.4
+    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.1.0
     `;
     console.log(chalk.cyan(banner));
 };
@@ -128,12 +128,13 @@ program
     .description('Add a new OpenClaw agent to your swarm')
     .option('-n, --name <name>', 'Name of the agent')
     .option('-r, --role <role>', 'Role of the agent')
+    .option('-m, --mode <mode>', 'Deployment mode (personal/enterprise)')
     .action(async (options) => {
         await init();
         printBanner();
         console.log(chalk.bold.cyan('\n🦞 SurgeClaw Onboarding Wizard'));
 
-        let { name, role } = options;
+        let { name, role, mode: instanceMode } = options;
 
         if (!name || !role) {
             const answers = await inquirer.prompt([
@@ -146,6 +147,16 @@ program
                 },
                 {
                     type: 'list',
+                    name: 'mode',
+                    message: 'What best describes your deployment?',
+                    choices: [
+                        { name: 'Personal (Standard: No restrictions)', value: 'personal' },
+                        { name: 'Enterprise (Regulated: Audit logging, strict isolation)', value: 'enterprise' }
+                    ],
+                    default: 'personal'
+                },
+                {
+                    type: 'list',
                     name: 'role',
                     message: 'What is this agent\'s primary mission?',
                     choices: ['The Researcher', 'The Coder', 'The Scout', 'Custom'],
@@ -154,7 +165,10 @@ program
             ]);
             name = name || answers.name;
             role = role || answers.role;
+            instanceMode = answers.mode;
         }
+
+        const mode = instanceMode || 'personal';
 
         const { instances } = await state.load();
         const { isPortAvailable } = require('./core/port-hunter');
@@ -197,7 +211,8 @@ program
             role,
             configPath: state.getConfigPath(name),
             stateDir: state.getStateDir(name),
-            logPath: require('path').join(state.getInstancePath(name), 'logs', 'gateway.log')
+            logPath: require('path').join(state.getInstancePath(name), 'logs', 'gateway.log'),
+            mode: mode
         };
 
         console.log(chalk.bold.cyan('\n  🦞 THE KING LOBSTER ORCHESTRATOR ⚡'));
@@ -225,10 +240,20 @@ program
 
         await state.addInstance(instance);
 
+        // Sentinel Audit
+        await state.logAudit('ONBOARD_INSTANCE', {
+            name,
+            role,
+            mode: instance.mode
+        });
+
+        // Sentinel Strict Mode (Perms 600)
+        await state.secureInstance(name);
+
         console.log(chalk.green(`\n✔ Agent "${name}" initialized in your swarm!`));
         console.log(chalk.cyan(`\nNext Step: Step into the office to configure this agent:`));
         console.log(chalk.bold.white(`  surgeclaw configure "${name}"`));
-        console.log(chalk.dim(`\n(Inside the office, run "openclaw setup" to configure the agent's soul)`));
+        console.log(chalk.dim(`\n(Inside the office, run "openclaw onboard" to configure the agent's soul)`));
         console.log(chalk.dim(`\nNote: Every agent now has a 150-port safe buffer for browser profiles.`));
     });
 
@@ -280,6 +305,9 @@ program
             console.log(chalk.green(`✔ Data folders for ${name} purged.`));
         }
 
+        // Sentinel Audit
+        await state.logAudit('OFFBOARD_INSTANCE', { name, contentWiped: wipe });
+
         console.log(chalk.green(`\n✔ Agent "${name}" offboarded successfully.`));
     });
 
@@ -322,6 +350,9 @@ program
             console.log(chalk.green('✔ All agent data cabinets purged.'));
         }
 
+        // Sentinel Audit
+        await state.logAudit('CLI_UNINSTALL', { mode });
+
         // Wipe global config
         await require('fs-extra').remove(state.root);
         console.log(chalk.green(`✔ SurgeClaw global configuration (${state.root}) removed.`));
@@ -349,6 +380,12 @@ swarm
             process.stdout.write(`  Deploying ${chalk.bold(instance.name)}... `);
             try {
                 await orchestrator.startGateway(instance, instance.port);
+
+                // Sentinel Strict Mode (Perms 600)
+                await state.secureInstance(instance.name);
+
+                // Sentinel Audit
+                await state.logAudit('START_INSTANCE', { name: instance.name, context: 'swarm' });
                 console.log(chalk.green('✔'));
             } catch (err) {
                 console.log(chalk.red('✖'));
@@ -364,6 +401,10 @@ swarm
         console.log(chalk.bold.yellow('\n🦞 Sent the signal to stand down...'));
         const shell = require('shelljs');
         shell.exec('pkill -f openclaw', { silent: true });
+
+        // Sentinel Audit
+        await state.logAudit('STOP_SWARM', { reason: 'manual_kill' });
+
         console.log(chalk.green('✔ Swarm processes terminated.'));
     });
 
@@ -382,6 +423,13 @@ program
 
         console.log(chalk.bold.cyan(`\n🦞 Deploying ${name} to the background...`));
         await orchestrator.startGateway(instance, instance.port);
+
+        // Sentinel Strict Mode (Perms 600)
+        await state.secureInstance(name);
+
+        // Sentinel Audit
+        await state.logAudit('START_INSTANCE', { name, context: 'single' });
+
         console.log(chalk.green(`✔ ${name} is now running on Port ${instance.port}!`));
         console.log(chalk.dim('You can close this terminal window; the agent will stay alive.'));
     });
@@ -402,6 +450,10 @@ program
         console.log(chalk.bold.yellow(`\n🦞 Signaling ${name} to stand down...`));
         const shell = require('shelljs');
         shell.exec(`pkill -f "profile ${instance.profile}"`, { silent: true });
+
+        // Sentinel Audit
+        await state.logAudit('STOP_INSTANCE', { name });
+
         console.log(chalk.green(`✔ ${name} has been stopped.`));
     });
 
@@ -429,8 +481,13 @@ program
             OPENCLAW_CONFIG_PATH: instance.configPath,
             OPENCLAW_STATE_DIR: instance.stateDir,
             OPENCLAW_GATEWAY_PORT: String(instance.port), // Seed the port!
-            SURGE_ACTIVE_AGENT: name
+            SURGE_ACTIVE_AGENT: name,
+            PS1: `(🦞 ${name}) %n@%m %1~ %# `,
+            PROMPT: `(🦞 ${name}) %n@%m %1~ %# `
         };
+
+        // Sentinel Audit
+        await state.logAudit('ENTER_OFFICE', { name });
 
         const shell = process.env.SHELL || 'bash';
         const { spawn } = require('child_process');

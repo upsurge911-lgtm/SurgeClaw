@@ -53,8 +53,7 @@ class Orchestrator {
         const child = spawn('openclaw', ['--profile', instance.profile, 'gateway', '--port', port.toString(), '--allow-unconfigured'], {
             env,
             cwd: path.dirname(instance.configPath),
-            stdio: 'inherit',
-            shell: true,
+            stdio: 'ignore',
             detached: true
         });
 

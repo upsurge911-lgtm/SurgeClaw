@@ -3,12 +3,15 @@ const net = require('net');
 async function isPortAvailable(port) {
     return new Promise((resolve) => {
         const server = net.createServer();
-        server.once('error', () => resolve(false));
+        server.once('error', (err) => {
+            // If EADDRINUSE, it's occupied. If EACCES/EPERM, it's blocked/privileged.
+            resolve(false);
+        });
         server.once('listening', () => {
             server.close();
             resolve(true);
         });
-        server.listen(port);
+        server.listen(port, '127.0.0.1');
     });
 }
 
