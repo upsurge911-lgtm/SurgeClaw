@@ -2,7 +2,7 @@
 
 **One Machine. Infinite OpenClaws.**  
 SurgeClaw is a professional process manager and governance layer for OpenClaw swarms.  
-It enables you to deploy, isolate, and audit multiple AI agents on a single machine with zero configuration debt.
+It enables you to deploy, isolate, and audit multiple OpenClaws on a single machine with zero configuration debt.
 
 ![SurgeClaw Sentinel Demo](assets/Demo_HQ.gif)
 
@@ -19,7 +19,7 @@ npm install -g advantage-surgeclaw
 
 ### 2. Launch
 ```bash
-# Onboard your first agent
+# Onboard your first OpenClaw
 surgeclaw onboard
 
 # Activate the swarm
@@ -29,30 +29,20 @@ surgeclaw swarm start
 ---
 
 ## 🛡️ SurgeClaw Sentinel (v1.1.0)
-SurgeClaw Sentinel transforms a group of agents into a **Regulated AI Department**. It layers enterprise-grade security over native OpenClaw logic:
+SurgeClaw Sentinel transforms a group of OpenClaw instances into a **Regulated AI Department**. It layers enterprise-grade security over native OpenClaw logic:
 
 *   **Audit Ledger**: Every management action is recorded to a secure, tamper-proof log for SOC 2 and UAE AI Act compliance.
-*   **Strict Mode**: Enforces UNIX 600 (User-Only) permissions at the OS level for agent configuration and memory.
+*   **Strict Mode**: Enforces UNIX 600 (User-Only) permissions at the OS level for instance configuration and memory.
 *   **Personal/Enterprise Toggle**: Switch between a low-friction developer mode and a high-governance environment with one choice.
 
 ---
 
-## 🏗️ From Monolith to Enterprise Swarm
-Running an entire organization on a single OpenClaw instance is a critical vulnerability. In a monolithic setup, shared memory and single-port reliance mean that a fatal error during an experimental script test will bring down your core financial and operational agents. There is no permission boundary, and no audit trail for compliance.
-
-**SurgeClaw** restructures OpenClaw for the Enterprise:
-*   **Absolute Failure Isolation**: Every agent lives in a UNIX-locked vault (`chmod 700`). If your "Testing" agent crashes its sandbox, your "CEO" and "Finance" agents remain completely unaffected and online.
-*   **Sovereign Compliance**: Out of the box, SurgeClaw Sentinel provides a tamper-proof Audit Ledger, aligning your deployment with **SOC 2, HIPAA, and UAE PDPL** mandates.
-*   **Infinite Scalability**: Augment your entire corporate structure. Instantiate a new department entirely isolated from the rest of the company in 10 seconds, leveraging a single piece of hardware with zero network collisions.
-
-![Diagram](assets/README_diagram_1.svg)
-
----
-
 ## 🏛️ Architecture: The "Landlord" Model
-SurgeClaw acts as the **Administrative Command Center**. We do not rewrite OpenClaw's "soul"; we orchestrate its environment.
+SurgeClaw acts as the **Administrative Command Center**. We do not rewrite OpenClaw's "soul"; we orchestrate its environment. It provides the building (the machine), the utilities (the ports), and the security (the permissions), but it never interacts with the **Tenant** directly.
 
-![Diagram](assets/README_diagram_2.svg)
+![The Landlord Model](assets/ARCHITECTURE_diagram_1.svg)
+
+> **Deep Dive:** [Read the full Architecture Document](docs/ARCHITECTURE.md) to learn about our Three-Layer Isolation and Sub-shell Pattern.
 
 ---
 
@@ -69,8 +59,8 @@ SurgeClaw acts as the **Administrative Command Center**. We do not rewrite OpenC
 | Command | Action |
 | :--- | :--- |
 | `surgeclaw onboard` | Interactive wizard with Sentinel security choices. |
-| `surgeclaw swarm start` | Instant, background deployment of all registered agents. |
-| `surgeclaw configure [name]` | Step into an agent's isolated sub-shell (The Office). |
+| `surgeclaw swarm start` | Instant, background deployment of all registered OpenClaws. |
+| `surgeclaw configure [name]` | Step into an OpenClaw's isolated sub-shell (The Office). |
 | `surgeclaw status` | Real-time heartbeat and health check for the entire swarm. |
 
 *Full documentation available in* [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md).
