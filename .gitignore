@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 .npm_cache/
+.agent/
 
 # Debug/Tests
 audit_sandbox/
