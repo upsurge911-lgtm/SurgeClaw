@@ -1,4 +1,4 @@
-# SurgeClaw 🦞⚡
+# How to Deploy OpenClaw into Your Business? (SurgeClaw Enterprise) 🦞⚡
 
 **One Machine. Infinite OpenClaws.**  
 SurgeClaw is a professional process manager and governance layer for OpenClaw swarms.  
@@ -7,6 +7,8 @@ It enables you to deploy, isolate, and audit multiple AI agents on a single mach
 ![SurgeClaw Sentinel Demo](assets/Demo.gif)
 
 ---
+
+> **📖 Read our Official Guide:** [How to Deploy OpenClaw for Enterprise & Business](docs/HOW_TO_DEPLOY_OPENCLAW_FOR_ENTERPRISE.md)
 
 ## ⚡ Quick Start
 

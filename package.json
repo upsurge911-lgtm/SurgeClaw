@@ -1,7 +1,7 @@
 {
   "name": "advantage-surgeclaw",
   "version": "1.1.0",
-  "description": "High-Performance Orchestration for Multi-Instance OpenClaw Swarms 🦞⚡",
+  "description": "How to deploy OpenClaw into your business? SurgeClaw is the enterprise orchestrator for OpenClaw swarms. 🦞⚡",
   "main": "src/index.js",
   "bin": {
     "surgeclaw": "./src/index.js"
@@ -14,11 +14,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "openclaw",
-    "swarm",
-    "orchestration",
-    "ai-agents",
-    "automation"
+    "openclaw for enterprise",
+    "openclaw for business",
+    "how to deploy openclaw",
+    "openclaw swarm",
+    "ai orchestration",
+    "ai agents"
   ],
   "author": "Advantage Technologies Inc.",
   "license": "MIT",
