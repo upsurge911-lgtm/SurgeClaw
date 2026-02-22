@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+.npm_cache/
+
+# Debug/Tests
+audit_sandbox/
+persistent_audit_sandbox/
+final_deep_dive/
+final_demo_sandbox/
+
+# OS Files
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local

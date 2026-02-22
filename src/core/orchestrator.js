@@ -15,9 +15,10 @@ class Orchestrator {
                 OPENCLAW_HOME: path.dirname(instance.configPath),
                 OPENCLAW_CONFIG_PATH: instance.configPath,
                 OPENCLAW_STATE_DIR: instance.stateDir,
+                OPENCLAW_GATEWAY_PORT: String(instance.port)
             };
 
-            console.log(`\n\x1b[36m[SurgeClaw] Routing to \${instance.name}...\x1b[0m`);
+            console.log(`\n\x1b[36m[SurgeClaw] Routing to ${instance.name}...\x1b[0m`);
 
             const child = spawn('openclaw', ['--profile', instance.profile, ...args], {
                 env,
@@ -28,7 +29,7 @@ class Orchestrator {
 
             child.on('close', (code) => {
                 if (code === 0) resolve();
-                else reject(new Error(`Command failed with code \${code}`));
+                else reject(new Error(`Command failed with code ${code}`));
             });
         });
     }
@@ -43,12 +44,13 @@ class Orchestrator {
             OPENCLAW_HOME: path.dirname(instance.configPath),
             OPENCLAW_CONFIG_PATH: instance.configPath,
             OPENCLAW_STATE_DIR: instance.stateDir,
+            OPENCLAW_GATEWAY_PORT: String(instance.port)
         };
 
-        console.log(`\n\x1b[32m[SurgeClaw] Starting Gateway for \${instance.name} on port \${port}...\x1b[0m`);
+        console.log(`\n\x1b[32m[SurgeClaw] Starting Gateway for ${instance.name} on port ${port}...\x1b[0m`);
 
         // Note: port is handled by openclaw gateway internally if passed in args
-        const child = spawn('openclaw', ['--profile', instance.profile, 'gateway', '--port', port.toString()], {
+        const child = spawn('openclaw', ['--profile', instance.profile, 'gateway', '--port', port.toString(), '--allow-unconfigured'], {
             env,
             cwd: path.dirname(instance.configPath),
             stdio: 'inherit',

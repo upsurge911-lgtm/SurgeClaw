@@ -1,6 +1,6 @@
 {
   "name": "advantage-surgeclaw",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "High-Performance Orchestration for Multi-Instance OpenClaw Swarms 🦞⚡",
   "main": "src/index.js",
   "bin": {

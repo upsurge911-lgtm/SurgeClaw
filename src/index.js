@@ -13,7 +13,7 @@ const program = new Command();
 program
     .name('surgeclaw')
     .description('The King Lobster Orchestrator for OpenClaw Swarms 🦞⚡')
-    .version('1.0.3');
+    .version('1.0.4');
 
 // Initial setup
 const printBanner = () => {
@@ -23,7 +23,7 @@ const printBanner = () => {
     ███████╗██║   ██║██████╔╝██║  ███╗█████╗  ██║     ██║     ███████║██║ █╗ ██║
     ╚════██║██║   ██║██╔══██╗██║   ██║██╔══╝  ██║     ██║     ██╔══██║██║███╗██║
     ███████║╚██████╔╝██║  ██║╚██████╔╝███████╗╚██████╗███████╗██║  ██║╚███╔███╔╝
-    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.0.3
+    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ 🦞⚡ 1.0.4
     `;
     console.log(chalk.cyan(banner));
 };
@@ -55,19 +55,72 @@ program
     });
 
 program
-    .command('status')
+    .command('status [name...]')
     .description('Check the pulse of your swarm')
-    .action(async () => {
+    .action(async (nameParts) => {
         await init();
         const { instances } = await state.load();
+        const name = nameParts.length > 0 ? nameParts.join(' ') : null;
 
         console.log(chalk.bold.cyan('\n🦞 SurgeClaw Heartbeat Check...'));
 
-        for (const inst of instances) {
-            const exists = await require('fs-extra').pathExists(inst.configPath);
-            const status = exists ? chalk.green('INITIALIZED') : chalk.red('WAITING FOR SETUP');
-            console.log(`  ${inst.name.padEnd(15)} [${status}] on Port ${inst.port}`);
+        const checkInstances = name ? instances.filter(i => i.name === name) : instances;
+
+        if (name && checkInstances.length === 0) {
+            console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
+            return;
         }
+
+        for (const inst of checkInstances) {
+            const exists = await require('fs-extra').pathExists(inst.configPath);
+            const { isPortAvailable } = require('./core/port-hunter');
+            const isListening = !(await isPortAvailable(inst.port));
+
+            const initStatus = exists ? chalk.green('INITIALIZED') : chalk.red('EMPTY');
+            const runStatus = isListening ? chalk.bold.green('LIVE') : chalk.dim('IDLE');
+
+            console.log(`\n  ${chalk.bold(inst.name)}`);
+            console.log(`    ${chalk.dim('Status:')} ${initStatus} | ${runStatus}`);
+            console.log(`    ${chalk.dim('Port  :')} ${inst.port}`);
+
+            if (isListening) {
+                console.log(`    ${chalk.dim('Logs  :')} surgeclaw logs "${inst.name}"`);
+            }
+        }
+        console.log('');
+    });
+
+program
+    .command('logs <name...>')
+    .description('Stream the real-time heartbeat (logs) of a specific agent')
+    .action(async (nameParts) => {
+        await init();
+        const name = nameParts.join(' ');
+        const instance = await state.getInstance(name);
+
+        if (!instance) {
+            console.log(chalk.red(`\n✖ Agent "${name}" not found.`));
+            return;
+        }
+
+        const logPath = instance.logPath || require('path').join(state.getInstancePath(name), 'logs', 'gateway.log');
+        const fs = require('fs-extra');
+
+        if (!(await fs.pathExists(logPath))) {
+            console.log(chalk.yellow(`\n⚠ No logs found yet for "${name}".`));
+            console.log(chalk.dim(`Expected at: ${logPath}`));
+            return;
+        }
+
+        console.log(chalk.bold.cyan(`\n🦞 Streaming Logs for: ${name}`));
+        console.log(chalk.dim(`(Ctrl+C to stop streaming)\n`));
+
+        const { spawn } = require('child_process');
+        const tail = spawn('tail', ['-f', logPath], { stdio: 'inherit' });
+
+        tail.on('error', (err) => {
+            console.log(chalk.red(`\n✖ Error streaming logs: ${err.message}`));
+        });
     });
 
 program
@@ -106,7 +159,7 @@ program
         const { instances } = await state.load();
         const { isPortAvailable } = require('./core/port-hunter');
         const port18789Busy = !(await isPortAvailable(18789));
-        
+
         let startPort = 18789;
 
         // EMERGENCY PATCH (v1.0.3): Protect Port 18789 from collisions
@@ -135,7 +188,7 @@ program
         }
 
         const profile = `surge-${name}`;
-        const port = await findNextPortBlock(startPort);
+        const port = await findNextPortBlock(18810); // Start swarm at 18810+
 
         const instance = {
             name,
@@ -143,14 +196,32 @@ program
             port,
             role,
             configPath: state.getConfigPath(name),
-            stateDir: state.getStateDir(name)
+            stateDir: state.getStateDir(name),
+            logPath: require('path').join(state.getInstancePath(name), 'logs', 'gateway.log')
         };
 
         console.log(chalk.bold.cyan('\n  🦞 THE KING LOBSTER ORCHESTRATOR ⚡'));
         console.log(chalk.italic.dim('           "Built to Multiply. Born to Lead."\n'));
 
-        await require('fs-extra').ensureDir(require('path').dirname(instance.configPath));
-        await require('fs-extra').ensureDir(instance.stateDir);
+        const fs = require('fs-extra');
+        const path = require('path');
+        await fs.ensureDir(path.dirname(instance.configPath));
+        await fs.ensureDir(instance.stateDir);
+        await fs.ensureDir(path.dirname(instance.logPath));
+
+        // Automate Log Isolation (v1.0.4)
+        // If config exists, we patch it. If not, we'll wait for setup.
+        if (await fs.pathExists(instance.configPath)) {
+            try {
+                const config = await fs.readJson(instance.configPath);
+                config.logging = config.logging || {};
+                config.logging.file = instance.logPath;
+                await fs.writeJson(instance.configPath, config, { spaces: 2 });
+                console.log(chalk.dim(`  ✔ Log isolation configured: ${instance.logPath}`));
+            } catch (err) {
+                // Config might be malformed or empty, skip patching
+            }
+        }
 
         await state.addInstance(instance);
 
@@ -158,6 +229,7 @@ program
         console.log(chalk.cyan(`\nNext Step: Step into the office to configure this agent:`));
         console.log(chalk.bold.white(`  surgeclaw configure "${name}"`));
         console.log(chalk.dim(`\n(Inside the office, run "openclaw setup" to configure the agent's soul)`));
+        console.log(chalk.dim(`\nNote: Every agent now has a 150-port safe buffer for browser profiles.`));
     });
 
 program
@@ -356,6 +428,7 @@ program
             OPENCLAW_HOME: require('path').dirname(instance.configPath),
             OPENCLAW_CONFIG_PATH: instance.configPath,
             OPENCLAW_STATE_DIR: instance.stateDir,
+            OPENCLAW_GATEWAY_PORT: String(instance.port), // Seed the port!
             SURGE_ACTIVE_AGENT: name
         };
 
