@@ -1,5 +1,9 @@
 # How to Deploy OpenClaw into Your Business? (SurgeClaw Enterprise) 🦞⚡
 
+[![npm version](https://img.shields.io/npm/v/advantage-surgeclaw.svg?style=flat-square)](https://www.npmjs.com/package/advantage-surgeclaw)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg?style=flat-square)](https://nodejs.org/)
+
 **One Machine. Infinite OpenClaws.**  
 SurgeClaw is a professional process manager and governance layer for OpenClaw swarms.  
 It enables you to deploy, isolate, and audit multiple OpenClaws on a single machine with zero configuration debt.
