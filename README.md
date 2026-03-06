@@ -7,9 +7,15 @@
   SurgeClaw is a professional process manager and governance layer for OpenClaw swarms.  
   It enables you to deploy, isolate, and audit multiple OpenClaws on a single machine with zero configuration debt.
 
-  [![npm version](https://img.shields.io/npm/v/advantage-surgeclaw.svg?style=flat-square)](https://www.npmjs.com/package/advantage-surgeclaw)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+  [![Release](https://img.shields.io/badge/release-v1.1.1-yellow.svg?style=flat-square)](https://github.com/upsurge911-lgtm/SurgeClaw/releases)
+  [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat-square)](https://github.com/upsurge911-lgtm/SurgeClaw/actions)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg?style=flat-square)](https://nodejs.org/)
+  <br />
+  [![SOC2](https://img.shields.io/badge/Compliance-SOC2_Ready-blueviolet.svg?style=flat-square)](docs/SECURITY.md)
+  [![UAE AI Act](https://img.shields.io/badge/Compliance-UAE_AI_Act-00732f.svg?style=flat-square)](docs/SECURITY.md)
+  [![Made in Dubai](https://img.shields.io/badge/Made_in-Dubai_🦞-red.svg?style=flat-square)](https://upsurge.ae)
+  [![npm downloads](https://img.shields.io/npm/dm/advantage-surgeclaw.svg?style=flat-square)](https://www.npmjs.com/package/advantage-surgeclaw)
 </div>
 
 ---
