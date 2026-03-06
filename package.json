@@ -1,6 +1,6 @@
 {
   "name": "advantage-surgeclaw",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "How to deploy OpenClaw into your business? SurgeClaw is the enterprise orchestrator for OpenClaw swarms. 🦞⚡",
   "main": "src/index.js",
   "bin": {
