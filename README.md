@@ -14,7 +14,7 @@
   <br />
   [![SOC2](https://img.shields.io/badge/Compliance-SOC2_Ready-blueviolet.svg?style=flat-square)](docs/SECURITY.md)
   [![UAE AI Act](https://img.shields.io/badge/Compliance-UAE_AI_Act-00732f.svg?style=flat-square)](docs/SECURITY.md)
-  [![Made in Dubai](https://img.shields.io/badge/Made_in-Dubai_🦞-red.svg?style=flat-square)](https://upsurge.ae)
+  [![Made in UAE](https://img.shields.io/badge/Made_in-UAE_🇦🇪-red.svg?style=flat-square)](https://upsurge.ae)
 </div>
 
 ---
